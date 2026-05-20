@@ -40,36 +40,48 @@ Aplikasi ini dilengkapi dengan berbagai fitur fungsional dan peningkatan UI/UX:
 ## 📸 Screenshot Aplikasi
 
 ### 1. Splash Screen & Home Screen
-![Splash Screen](screenshots/splash_screen..jpg)
-![Home Screen](screenshots/home_screen.jpg)
-![Home Screen](screenshots/home_screen2.jpg)
+<p align="left">
+  <img src="screenshots/splash_screen..jpg" width="260" alt="Splash Screen" />
+  <img src="screenshots/home_screen.jpg" width="260" alt="Home Screen 1" />
+  <img src="screenshots/home_screen2.jpg" width="260" alt="Home Screen 2" />
+</p>
 
 ### 2. Menu Screen & Pencarian
-![Menu Screen](screenshots/menu_screen.jpg)
+<p align="left">
+  <img src="screenshots/menu_screen.jpg" width="260" alt="Menu Screen" />
+</p>
 
 ### 3. Detail Menu (Parallax & Favorit)
-![Detail Menu](screenshots/detail_menu_screen.jpg)
+<p align="left">
+  <img src="screenshots/detail_menu_screen.jpg" width="260" alt="Detail Menu Screen" />
+</p>
 
 ### 4. Form Tambah/Edit Menu
-![Form Menu](screenshots/form_menu_screen.jpg)
+<p align="left">
+  <img src="screenshots/form_menu_screen.jpg" width="260" alt="Form Menu Screen" />
+</p>
 
 ### 5. Profile Screen & Edit Profile
-![Profile Screen](screenshots/profile_screen.jpg)
+<p align="left">
+  <img src="screenshots/profile_screen.jpg" width="260" alt="Profile Screen" />
+</p>
 
 ### 6. Tampilan Dark Mode
-![Dark Mode](screenshots/dark_mode_splash_screen.jpg)
-![Home Screen](screenshots/dark_mode_home_screen.jpg)
-![Home Screen](screenshots/dark_mode_home_screen2.jpg)
+<p align="left">
+  <img src="screenshots/dark_mode_splash_screen.jpg" width="260" alt="Dark Mode Splash Screen" />
+  <img src="screenshots/dark_mode_home_screen.jpg" width="260" alt="Dark Mode Home Screen 1" />
+  <img src="screenshots/dark_mode_home_screen2.jpg" width="260" alt="Dark Mode Home Screen 2" />
+</p>
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Language**: [Kotlin](https://kotlinlang.org/)
-- **UI Framework**: [Jetpack Compose (Material 3)](https://developer.android.com/jetpack/compose)
+- **Language**: [Kotlin](https://kotlinlang.org)
+- **UI Framework**: [Jetpack Compose (Material 3)](https://android.com)
 - **Navigation**: Navigation Compose
-- **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
-- **Data Persistence**: SharedPreferences & [Gson](https://github.com/google/gson)
+- **Image Loading**: [Coil](https://github.io)
+- **Data Persistence**: SharedPreferences & [Gson](https://github.com)
 
 ---
 
@@ -77,7 +89,7 @@ Aplikasi ini dilengkapi dengan berbagai fitur fungsional dan peningkatan UI/UX:
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/username/menu-restoran.git
+   git clone https://github.com
    ```
 2. **Buka di Android Studio**
    - Pilih *Open an Existing Project*.
@@ -90,4 +102,4 @@ Aplikasi ini dilengkapi dengan berbagai fitur fungsional dan peningkatan UI/UX:
 
 ---
 
-© 2024 - Project UTS Pemrograman Mobile
+© 2026 - Project UTS Pemrograman Mobile
