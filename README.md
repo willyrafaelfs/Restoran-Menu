@@ -89,7 +89,7 @@ Aplikasi ini dilengkapi dengan berbagai fitur fungsional dan peningkatan UI/UX:
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com
+   git clone https://github.com/willyrafaelfs/Restoran-Menu
    ```
 2. **Buka di Android Studio**
    - Pilih *Open an Existing Project*.
