@@ -54,16 +54,19 @@ Aplikasi ini dilengkapi dengan berbagai fitur fungsional dan peningkatan UI/UX:
 ### 3. Detail Menu (Parallax & Favorit)
 <p align="left">
   <img src="screenshots/detail_menu_screen.jpg" width="260" alt="Detail Menu Screen" />
+  <img src="screenshots/detail_menu_screen2.jpg" width="260" alt="Detail Menu Screen" />
 </p>
 
 ### 4. Form Tambah/Edit Menu
 <p align="left">
   <img src="screenshots/form_menu_screen.jpg" width="260" alt="Form Menu Screen" />
+  <img src="screenshots/edit_menu_screen.jpg" width="260" alt="Form Menu Screen" />
 </p>
 
 ### 5. Profile Screen & Edit Profile
 <p align="left">
   <img src="screenshots/profile_screen.jpg" width="260" alt="Profile Screen" />
+  <img src="screenshots/profile_edit_screen.jpg" width="260" alt="Profile Screen" />
 </p>
 
 ### 6. Tampilan Dark Mode
