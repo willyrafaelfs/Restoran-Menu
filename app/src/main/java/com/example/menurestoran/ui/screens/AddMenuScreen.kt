@@ -59,6 +59,7 @@ fun AddMenuScreen(navController: NavHostController, prefs: SharedPreferences) {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Tambah Menu Baru") },
@@ -66,7 +67,10 @@ fun AddMenuScreen(navController: NavHostController, prefs: SharedPreferences) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->

@@ -38,6 +38,7 @@ fun ProfileScreen(navController: NavHostController, prefs: SharedPreferences, up
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -51,7 +52,10 @@ fun ProfileScreen(navController: NavHostController, prefs: SharedPreferences, up
                     IconButton(onClick = { navController.navigate("edit_profile") }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->

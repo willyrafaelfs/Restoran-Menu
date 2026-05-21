@@ -65,6 +65,7 @@ fun EditMenuScreen(navController: NavHostController, prefs: SharedPreferences, m
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Edit Menu") },
@@ -72,7 +73,10 @@ fun EditMenuScreen(navController: NavHostController, prefs: SharedPreferences, m
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->

@@ -3,10 +3,13 @@ package com.example.menurestoran.ui.screens
 
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,8 +19,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -32,221 +35,491 @@ import com.example.menurestoran.model.MenuRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailMenuScreen(navController: NavHostController, menuId: Long, prefs: SharedPreferences) {
+fun DetailMenuScreen(
+    navController: NavHostController,
+    menuId: Long,
+    prefs: SharedPreferences
+) {
     val context = LocalContext.current
     val menuList = remember { MenuRepository.getMenu(prefs) }
     val item = menuList.find { it.id == menuId } ?: return
 
     var rating by remember { mutableIntStateOf(0) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
-    val favorites = remember { mutableStateOf(prefs.getStringSet("favorite_menus", emptySet()) ?: emptySet()) }
+
+    val favorites = remember {
+        mutableStateOf(
+            prefs.getStringSet("favorite_menus", emptySet()) ?: emptySet()
+        )
+    }
+
     val isFavorite = favorites.value.contains(menuId.toString())
-    
+
     var isHeartClicked by remember { mutableStateOf(false) }
+
     val heartScale by animateFloatAsState(
         targetValue = if (isHeartClicked) 1.5f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-        finishedListener = { isHeartClicked = false }
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        finishedListener = {
+            isHeartClicked = false
+        },
+        label = "heartScale"
     )
 
     val scrollState = rememberLazyListState()
+
     val headerHeight = 300.dp
-    
-    val firstItemOffset = remember { derivedStateOf { scrollState.firstVisibleItemScrollOffset } }
-    val firstItemIndex = remember { derivedStateOf { scrollState.firstVisibleItemIndex } }
-    
-    val headerAlpha = remember {
+
+    val firstItemOffset = remember {
         derivedStateOf {
-            if (firstItemIndex.value > 0) 0f
-            else (1f - (firstItemOffset.value.toFloat() / 500f)).coerceIn(0f, 1f)
+            scrollState.firstVisibleItemScrollOffset
         }
     }
-    
+
+    val firstItemIndex = remember {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex
+        }
+    }
+
+    val headerAlpha = remember {
+        derivedStateOf {
+            if (firstItemIndex.value > 0) {
+                0f
+            } else {
+                (
+                        1f - (
+                                firstItemOffset.value.toFloat() / 500f
+                                )
+                        ).coerceIn(0f, 1f)
+            }
+        }
+    }
+
     val headerTranslation = remember {
         derivedStateOf {
-            if (firstItemIndex.value > 0) 0f
-            else (firstItemOffset.value.toFloat() * 0.5f)
+            if (firstItemIndex.value > 0) {
+                0f
+            } else {
+                firstItemOffset.value.toFloat() * 0.5f
+            }
         }
     }
 
     if (showDeleteDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Hapus Menu") },
-            text = { Text("Apakah Anda yakin ingin menghapus ${item.name}?") },
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+            title = {
+                Text("Hapus Menu")
+            },
+            text = {
+                Text("Apakah Anda yakin ingin menghapus ${item.name}?")
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    MenuRepository.deleteMenuItem(prefs, menuId)
-                    showDeleteDialog = false
-                    navController.popBackStack()
-                }) {
-                    Text("Ya, Hapus", color = Color.Red)
+                TextButton(
+                    onClick = {
+                        MenuRepository.deleteMenuItem(prefs, menuId)
+                        showDeleteDialog = false
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text(
+                        "Ya, Hapus",
+                        color = Color.Red
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                    }
+                ) {
                     Text("Batal")
                 }
             }
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
         LazyColumn(
             state = scrollState,
             modifier = Modifier.fillMaxSize()
         ) {
+
             item {
-                Spacer(modifier = Modifier.height(headerHeight))
+                Spacer(
+                    modifier = Modifier.height(headerHeight)
+                )
             }
+
             item {
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                        .graphicsLayer {
+                            translationY = -32.dp.toPx()
+                        }
+                        .background(
+                            MaterialTheme.colorScheme.surface,
+                            RoundedCornerShape(
+                                topStart = 32.dp,
+                                topEnd = 32.dp
+                            )
+                        )
                         .padding(24.dp),
+
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
                         Text(
-                            item.name, 
-                            style = MaterialTheme.typography.headlineLarge, 
+                            text = item.name,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 48.dp)
+
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 48.dp)
                         )
+
                         IconButton(
                             onClick = {
+
                                 isHeartClicked = true
-                                val current = prefs.getStringSet("favorite_menus", emptySet())?.toMutableSet() ?: mutableSetOf()
-                                if (isFavorite) current.remove(menuId.toString()) else current.add(menuId.toString())
-                                prefs.edit().putStringSet("favorite_menus", current).apply()
+
+                                val current =
+                                    prefs.getStringSet(
+                                        "favorite_menus",
+                                        emptySet()
+                                    )?.toMutableSet()
+                                        ?: mutableSetOf()
+
+                                if (isFavorite) {
+                                    current.remove(menuId.toString())
+                                } else {
+                                    current.add(menuId.toString())
+                                }
+
+                                prefs.edit()
+                                    .putStringSet("favorite_menus", current)
+                                    .apply()
+
                                 favorites.value = current
                             },
+
                             modifier = Modifier.align(Alignment.CenterEnd)
                         ) {
+
                             Icon(
-                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                imageVector =
+                                    if (isFavorite)
+                                        Icons.Default.Favorite
+                                    else
+                                        Icons.Default.FavoriteBorder,
+
                                 contentDescription = "Favorite",
+
                                 modifier = Modifier.scale(heartScale),
-                                tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+
+                                tint =
+                                    if (isFavorite)
+                                        Color.Red
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-                    
+
                     Text(
-                        item.price, 
-                        style = MaterialTheme.typography.headlineSmall, 
+                        text = item.price,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
+
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
+
                         modifier = Modifier.fillMaxWidth()
                     ) {
+
                         for (i in 1..5) {
+
                             Icon(
-                                imageVector = if (i <= rating) Icons.Default.Star else Icons.Default.StarBorder,
+                                imageVector =
+                                    if (i <= rating)
+                                        Icons.Default.Star
+                                    else
+                                        Icons.Default.StarBorder,
+
                                 contentDescription = "Star $i",
-                                tint = if (i <= rating) Color(0xFFFFD700) else Color.Gray,
+
+                                tint =
+                                    if (i <= rating)
+                                        Color(0xFFFFD700)
+                                    else
+                                        Color.Gray,
+
                                 modifier = Modifier
                                     .size(36.dp)
-                                    .clickable { rating = i }
+                                    .clickable {
+                                        rating = i
+                                    }
                                     .padding(4.dp)
                             )
                         }
                     }
+
                     Text(
-                        text = if (rating > 0) "Rating Anda: $rating/5" else "Berikan Rating",
+                        text =
+                            if (rating > 0)
+                                "Rating Anda: $rating/5"
+                            else
+                                "Berikan Rating",
+
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.outline,
                         textAlign = TextAlign.Center,
+
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
+
                     HorizontalDivider()
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Text(
                         text = item.description,
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Justify,
                         lineHeight = 24.sp,
+
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(40.dp))
-                    
+
                     Button(
-                        onClick = { navController.popBackStack() },
+                        onClick = {
+                            navController.popBackStack()
+                        },
+
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
+
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Kembali ke Menu", fontWeight = FontWeight.Bold)
+
+                        Text(
+                            "Kembali ke Menu",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
+
                     Spacer(modifier = Modifier.height(100.dp))
                 }
             }
         }
 
-        // AsyncImage Parallax Header
+        // HEADER IMAGE
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(headerHeight)
+                .statusBarsPadding() // FIX STATUS BAR
                 .graphicsLayer {
                     translationY = -headerTranslation.value
                     alpha = headerAlpha.value
                 }
         ) {
+
             AsyncImage(
                 model = item.imageUrl,
                 contentDescription = null,
+
                 modifier = Modifier.fillMaxSize(),
+
                 contentScale = ContentScale.Crop
             )
         }
 
         TopAppBar(
-            title = { 
+            modifier = Modifier.zIndex(1f),
+
+            title = {
+
                 if (headerAlpha.value < 0.5f) {
                     Text(item.name)
                 }
             },
+
             navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            },
-            actions = {
-                IconButton(onClick = { navController.navigate("edit_menu/${item.id}") }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit Menu")
-                }
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Hapus Menu", tint = Color.Red)
-                }
-                IconButton(onClick = {
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Cobain deh ${item.name} di Restoran kami, harganya cuma ${item.price}!")
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+
+                    color =
+                        if (headerAlpha.value > 0.5f)
+                            Color.Black.copy(alpha = 0.3f)
+                        else
+                            Color.Transparent,
+
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
+
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+
+                            tint =
+                                if (headerAlpha.value > 0.5f)
+                                    Color.White
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                    context.startActivity(Intent.createChooser(shareIntent, "Bagikan Menu"))
-                }) {
-                    Icon(Icons.Default.Share, contentDescription = "Bagikan")
                 }
             },
+
+            actions = {
+
+                val actionIconTint =
+                    if (headerAlpha.value > 0.5f)
+                        Color.White
+                    else
+                        MaterialTheme.colorScheme.onSurface
+
+                val actionBgColor =
+                    if (headerAlpha.value > 0.5f)
+                        Color.Black.copy(alpha = 0.3f)
+                    else
+                        Color.Transparent
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = actionBgColor
+                ) {
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate("edit_menu/${item.id}")
+                        }
+                    ) {
+
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Menu",
+                            tint = actionIconTint
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = actionBgColor
+                ) {
+
+                    IconButton(
+                        onClick = {
+                            showDeleteDialog = true
+                        }
+                    ) {
+
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Hapus Menu",
+
+                            tint =
+                                if (headerAlpha.value > 0.5f)
+                                    Color.White
+                                else
+                                    Color.Red
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = actionBgColor
+                ) {
+
+                    IconButton(
+                        onClick = {
+
+                            val shareIntent =
+                                Intent(Intent.ACTION_SEND).apply {
+
+                                    type = "text/plain"
+
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Cobain deh ${item.name} di Restoran kami, harganya cuma ${item.price}!"
+                                    )
+                                }
+
+                            context.startActivity(
+                                Intent.createChooser(
+                                    shareIntent,
+                                    "Bagikan Menu"
+                                )
+                            )
+                        }
+                    ) {
+
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Bagikan",
+                            tint = actionIconTint
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+            },
+
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = if (headerAlpha.value < 0.1f) MaterialTheme.colorScheme.surface else Color.Transparent
+                containerColor =
+                    if (headerAlpha.value < 0.5f)
+                        MaterialTheme.colorScheme.surface.copy(
+                            alpha = (
+                                    1f - headerAlpha.value * 2
+                                    ).coerceIn(0f, 1f)
+                        )
+                    else
+                        Color.Transparent
             )
         )
     }

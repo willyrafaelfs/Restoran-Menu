@@ -61,6 +61,7 @@ fun HomeScreen(
     val pagerState = rememberPagerState(pageCount = { 2 })
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { 
@@ -76,7 +77,10 @@ fun HomeScreen(
                             contentDescription = "Toggle Theme"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {

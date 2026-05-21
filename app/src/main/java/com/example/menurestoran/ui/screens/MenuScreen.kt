@@ -58,6 +58,7 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Menu Restoran") },
@@ -65,7 +66,10 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
