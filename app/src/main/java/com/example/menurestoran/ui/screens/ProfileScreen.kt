@@ -23,8 +23,8 @@ import androidx.navigation.NavHostController
 @Composable
 fun ProfileScreen(navController: NavHostController, prefs: SharedPreferences, updated: Boolean = false) {
     val context = LocalContext.current
-    val name = prefs.getString("name", "Restoran Vibe") ?: "Restoran Vibe"
-    val email = prefs.getString("email", "contact@restovibe.com") ?: "contact@restovibe.com"
+    val name = prefs.getString("name", "Will Restaurant") ?: "Will Restaurant"
+    val email = prefs.getString("email", "willrestcontact@gmail.com") ?: "willrestcontact@gmail.com"
     val address = prefs.getString("address", "Jl. Kuliner No. 123, Jakarta") ?: "Jl. Kuliner No. 123, Jakarta"
     val description = prefs.getString("description", "Restoran dengan cita rasa otentik dan suasana nyaman.") ?: "Restoran dengan cita rasa otentik dan suasana nyaman."
     val hours = prefs.getString("hours", "09:00 - 21:00") ?: "09:00 - 21:00"

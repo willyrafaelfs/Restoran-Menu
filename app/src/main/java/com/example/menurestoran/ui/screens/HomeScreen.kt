@@ -48,7 +48,7 @@ fun HomeScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     
-    val restoName = remember(navBackStackEntry) { prefs.getString("name", "Restoran Vibe") ?: "Restoran Vibe" }
+    val restoName = remember(navBackStackEntry) { prefs.getString("name", "Will Restaurant") ?: "Will Restaurant" }
     val restoAddress = remember(navBackStackEntry) { prefs.getString("address", "Jl. Kuliner No. 123, Jakarta") ?: "Jl. Kuliner No. 123, Jakarta" }
     val restoDesc = remember(navBackStackEntry) { prefs.getString("description", "Restoran dengan cita rasa otentik dan suasana nyaman.") ?: "Restoran dengan cita rasa otentik dan suasana nyaman." }
     val restoHours = remember(navBackStackEntry) { prefs.getString("hours", "09:00 - 22:00") ?: "09:00 - 22:00" }
