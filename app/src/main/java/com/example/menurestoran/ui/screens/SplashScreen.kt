@@ -49,7 +49,7 @@ fun SplashScreen(navController: NavHostController) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Rona Rasa Restaurant",
+                text = "Will Restaurant",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
