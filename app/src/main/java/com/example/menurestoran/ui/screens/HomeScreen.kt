@@ -1,4 +1,3 @@
-// File: ui/screens/HomeScreen.kt
 package com.example.menurestoran.ui.screens
 
 import android.content.Intent
@@ -15,7 +14,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
@@ -31,12 +30,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
+import com.example.menurestoran.model.MenuRepository
+import com.example.menurestoran.ui.theme.RonaElevation
+import com.example.menurestoran.ui.utils.LocalReduceMotion
+import com.example.menurestoran.ui.utils.pressScaleEffect
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,27 +50,76 @@ fun HomeScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     
-    val restoName = remember(navBackStackEntry) { prefs.getString("name", "Will Restaurant") ?: "Will Restaurant" }
-    val restoAddress = remember(navBackStackEntry) { prefs.getString("address", "Jl. Kuliner No. 123, Jakarta") ?: "Jl. Kuliner No. 123, Jakarta" }
-    val restoDesc = remember(navBackStackEntry) { prefs.getString("description", "Restoran dengan cita rasa otentik dan suasana nyaman.") ?: "Restoran dengan cita rasa otentik dan suasana nyaman." }
+    val rawRestoName = remember(navBackStackEntry) { prefs.getString("name", "Rona Rasa") ?: "Rona Rasa" }
+    val restoName = if (rawRestoName.contains("Restaurant")) rawRestoName.replace(" Restaurant", "") else rawRestoName
+    val restoAddress = remember(navBackStackEntry) { prefs.getString("address", "Jl. Heritage No. 1, Yogyakarta") ?: "Jl. Heritage No. 1, Yogyakarta" }
+    val restoDesc = remember(navBackStackEntry) { prefs.getString("description", "Warisan Kuliner Jawa dengan Sentuhan Modern.") ?: "Warisan Kuliner Jawa dengan Sentuhan Modern." }
     val restoHours = remember(navBackStackEntry) { prefs.getString("hours", "09:00 - 22:00") ?: "09:00 - 22:00" }
     val restoBanner = remember(navBackStackEntry) { prefs.getString("banner_url", "") ?: "" }
 
     val context = LocalContext.current
+    val reduceMotion = LocalReduceMotion.current
     var isFabExpanded by remember { mutableStateOf(false) }
-    val fabRotation by animateFloatAsState(if (isFabExpanded) 45f else 0f)
+    val fabRotation by animateFloatAsState(
+        targetValue = if (isFabExpanded) 45f else 0f,
+        animationSpec = if (reduceMotion) snap() else spring(),
+        label = "fabRotation"
+    )
 
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
+
+    // Smooth Auto-scroll pager
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(5000)
+            if (!pagerState.isScrollInProgress) {
+                val nextPage = (pagerState.currentPage + 1) % pagerState.pageCount
+                if (!reduceMotion) {
+                    pagerState.animateScrollToPage(
+                        page = nextPage,
+                        animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing)
+                    )
+                } else {
+                    pagerState.scrollToPage(nextPage)
+                }
+            }
+        }
+    }
+
+    // Staggered Entrance Animations
+    var welcomeVisible by remember { mutableStateOf(false) }
+    var nameVisible by remember { mutableStateOf(false) }
+    var pagerVisible by remember { mutableStateOf(false) }
+    var promoVisible by remember { mutableStateOf(false) }
+    var buttonVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (reduceMotion) {
+            welcomeVisible = true
+            nameVisible = true
+            pagerVisible = true
+            promoVisible = true
+            buttonVisible = true
+        } else {
+            delay(100)
+            welcomeVisible = true
+            delay(100)
+            nameVisible = true
+            delay(100)
+            pagerVisible = true
+            delay(100)
+            promoVisible = true
+            delay(100)
+            buttonVisible = true
+        }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { 
-                    Column {
-                        Text("Selamat Datang Di", style = MaterialTheme.typography.labelMedium)
-                        Text(restoName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    }
+                    Text("Rona Rasa", style = MaterialTheme.typography.headlineMedium)
                 },
                 actions = {
                     IconButton(onClick = { onThemeToggle(!isDarkMode) }) {
@@ -90,8 +141,8 @@ fun HomeScreen(
             ) {
                 AnimatedVisibility(
                     visible = isFabExpanded,
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                    enter = if (reduceMotion) fadeIn() else slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = if (reduceMotion) fadeOut() else slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
                     SmallFloatingActionButton(
                         onClick = {
@@ -100,7 +151,7 @@ fun HomeScreen(
                             }
                             context.startActivity(intent)
                         },
-                        shape = CircleShape,
+                        shape = MaterialTheme.shapes.small,
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     ) {
                         Icon(Icons.Default.Call, contentDescription = "Call")
@@ -108,8 +159,8 @@ fun HomeScreen(
                 }
                 AnimatedVisibility(
                     visible = isFabExpanded,
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                    enter = if (reduceMotion) fadeIn() else slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = if (reduceMotion) fadeOut() else slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
                     SmallFloatingActionButton(
                         onClick = {
@@ -118,7 +169,7 @@ fun HomeScreen(
                             mapIntent.setPackage("com.google.android.apps.maps")
                             context.startActivity(mapIntent)
                         },
-                        shape = CircleShape,
+                        shape = MaterialTheme.shapes.small,
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     ) {
                         Icon(Icons.Default.LocationOn, contentDescription = "Location")
@@ -127,7 +178,9 @@ fun HomeScreen(
                 FloatingActionButton(
                     onClick = { isFabExpanded = !isFabExpanded },
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.pressScaleEffect()
                 ) {
                     Icon(
                         Icons.Default.Add, 
@@ -145,95 +198,249 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                AnimatedVisibility(
+                    visible = welcomeVisible,
+                    enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically(initialOffsetY = { 20 })
+                ) {
+                    Text(
+                        text = "Selamat Datang di",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    )
+                }
+                
+                AnimatedVisibility(
+                    visible = nameVisible,
+                    enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically(initialOffsetY = { 20 })
+                ) {
+                    Text(
+                        text = restoName,
+                        style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Horizontal Pager
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                pageSpacing = 16.dp
-            ) { page ->
-                if (page == 0) {
-                    AsyncImage(
-                        model = if (restoBanner.isNotEmpty()) restoBanner else "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
-                        contentDescription = "Banner Restoran",
+            AnimatedVisibility(
+                visible = pagerVisible,
+                enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically(initialOffsetY = { 30 })
+            ) {
+                Column {
+                    HorizontalPager(
+                        state = pagerState,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Card(
-                        modifier = Modifier.fillMaxSize(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                            .fillMaxWidth()
+                            .height(240.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        pageSpacing = 16.dp
+                    ) { page ->
+                        when (page) {
+                            0 -> {
+                                AsyncImage(
+                                    model = if (restoBanner.isNotEmpty()) restoBanner else "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+                                    contentDescription = "Banner Restoran",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(MaterialTheme.shapes.extraLarge),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            1 -> {
+                                AsyncImage(
+                                    model = "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80",
+                                    contentDescription = "Suasana Restoran",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(MaterialTheme.shapes.extraLarge),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            2 -> {
+                                AsyncImage(
+                                    model = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+                                    contentDescription = "Koki Menyiapkan Makanan",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(MaterialTheme.shapes.extraLarge),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            3 -> {
+                                Card(
+                                    modifier = Modifier.fillMaxSize(),
+                                    shape = MaterialTheme.shapes.extraLarge,
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    elevation = CardDefaults.cardElevation(RonaElevation.raisedCard)
+                                ) {
+                                    Column(modifier = Modifier.padding(24.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.LocationOn,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(restoAddress, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
+                                        }
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.Schedule,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(restoHours, style = MaterialTheme.typography.bodyLarge)
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            restoDesc,
+                                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 3
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Pager Dots
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(restoAddress, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(restoHours, style = MaterialTheme.typography.bodySmall)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HorizontalDivider()
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                restoDesc,
-                                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 3
+                        repeat(4) { iteration ->
+                            val isSelected = pagerState.currentPage == iteration
+                            val width by animateDpAsState(
+                                targetValue = if (isSelected) 24.dp else 8.dp,
+                                animationSpec = if (reduceMotion) snap() else tween(300),
+                                label = "dotWidth"
+                            )
+                            val color by animateColorAsState(
+                                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                animationSpec = if (reduceMotion) snap() else tween(300),
+                                label = "dotColor"
+                            )
+                            
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .height(8.dp)
+                                    .width(width)
+                                    .clip(CircleShape)
+                                    .background(color)
                             )
                         }
                     }
                 }
             }
 
-            // Pager Dots
-            Row(
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Popular Menus Section
+            AnimatedVisibility(
+                visible = promoVisible,
+                enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically(initialOffsetY = { 45 })
             ) {
-                repeat(2) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    Box(
+                Column {
+                    Text(
+                        text = "Menu Terpopuler",
                         modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(8.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val menuList = remember { MenuRepository.getMenu(prefs) }
+                    val popularMenus = menuList.take(3)
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(popularMenus) { item ->
+                            Card(
+                                modifier = Modifier
+                                    .width(160.dp)
+                                    .clickable { navController.navigate("detail/${item.id}") }
+                                    .pressScaleEffect(),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                elevation = CardDefaults.cardElevation(RonaElevation.raisedCard)
+                            ) {
+                                Column {
+                                    AsyncImage(
+                                        model = if (item.imageUrl.isNotBlank()) item.imageUrl else "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80",
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(100.dp),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = item.name,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            maxLines = 1
+                                        )
+                                        Text(
+                                            text = item.price,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
-            Text(
-                text = "Promo Spesial Hari Ini",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            AnimatedVisibility(
+                visible = promoVisible,
+                enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically(initialOffsetY = { 40 })
+            ) {
+                Column {
+                    Text(
+                        text = "Penawaran Istimewa",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    PromoCarousel(navController)
+                }
+            }
             
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            PromoCarousel(navController)
-            
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -243,9 +450,9 @@ data class PromoItem(val title: String, val discount: String, val icon: ImageVec
 @Composable
 fun PromoCarousel(navController: NavHostController) {
     val promos = listOf(
-        PromoItem("Makan Siang Hemat", "Diskon 20%", Icons.Default.LunchDining, Color(0xFFFF7043), 1L),
-        PromoItem("Happy Hour Kopi", "Beli 1 Gratis 1", Icons.Default.Coffee, Color(0xFF5C6BC0), 5L),
-        PromoItem("Paket Keluarga", "Hemat Rp 50rb", Icons.Default.Groups, Color(0xFF66BB6A), 3L)
+        PromoItem("Makan Siang Hemat", "Diskon 20%", Icons.Default.LunchDining, MaterialTheme.colorScheme.primary, 1L),
+        PromoItem("Sate Spesial", "Porsi Kenyang", Icons.Default.Restaurant, MaterialTheme.colorScheme.secondary, 2L),
+        PromoItem("Happy Hour Kopi", "Beli 1 Gratis 1", Icons.Default.Coffee, MaterialTheme.colorScheme.tertiary, 4L)
     )
     
     LazyRow(
@@ -257,18 +464,19 @@ fun PromoCarousel(navController: NavHostController) {
                 modifier = Modifier
                     .width(280.dp)
                     .height(160.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(
                         Brush.linearGradient(
-                            listOf(promo.color, promo.color.copy(alpha = 0.7f))
+                            listOf(promo.color, promo.color.copy(alpha = 0.8f))
                         )
                     )
+                    .pressScaleEffect()
                     .clickable { navController.navigate("detail/${promo.menuId}") }
                     .padding(20.dp)
             ) {
                 Column(modifier = Modifier.align(Alignment.TopStart)) {
-                    Text(promo.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(promo.discount, color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp)
+                    Text(promo.title, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.titleLarge)
+                    Text(promo.discount, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f), style = MaterialTheme.typography.bodyLarge)
                 }
                 Icon(
                     imageVector = promo.icon,
@@ -277,7 +485,7 @@ fun PromoCarousel(navController: NavHostController) {
                         .size(80.dp)
                         .align(Alignment.BottomEnd)
                         .offset(x = 10.dp, y = 10.dp),
-                    tint = Color.White.copy(alpha = 0.3f)
+                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
                 )
             }
         }

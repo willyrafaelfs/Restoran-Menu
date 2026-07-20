@@ -1,58 +1,79 @@
 package com.example.menurestoran.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.material3.LocalRippleConfiguration
+import com.example.menurestoran.ui.utils.LocalReduceMotion
+import com.example.menurestoran.ui.utils.isReduceMotionEnabled
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = RonaDarkTerracotta,
+    onPrimary = RonaCream,
+    secondary = RonaDarkGold,
+    onSecondary = RonaCharcoal,
+    background = RonaDarkBackground,
+    onBackground = RonaDarkOnSurface,
+    surface = RonaDarkSurface,
+    onSurface = RonaDarkOnSurface,
+    tertiary = RonaSage,
+    error = Color(0xFFCF6679)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
+    primary = RonaTerracotta,
+    onPrimary = RonaCream,
+    secondary = RonaGold,
     onSecondary = Color.White,
+    background = RonaParchment,
+    onBackground = RonaCharcoal,
+    surface = RonaSurface,
+    onSurface = RonaCharcoal,
+    tertiary = RonaSage,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    error = Color(0xFFB00020)
 )
 
 @Composable
-fun MenuRestoranTheme(
+fun RonaRasaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val reduceMotion = isReduceMotionEnabled()
+    
+    val rippleConfig = RippleConfiguration(
+        color = RonaGold.copy(alpha = 0.2f)
+    )
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides rippleConfig,
+        LocalReduceMotion provides reduceMotion
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = RonaShapes,
+            content = content
+        )
+    }
 }

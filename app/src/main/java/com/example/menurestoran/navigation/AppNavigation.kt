@@ -3,6 +3,7 @@ package com.example.menurestoran.navigation
 
 import android.content.SharedPreferences
 import androidx.compose.animation.*
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -21,40 +22,46 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.menurestoran.ui.screens.*
+import com.example.menurestoran.ui.utils.LocalReduceMotion
 
 @Composable
 fun RestoApp(prefs: SharedPreferences, isDarkMode: Boolean, onThemeToggle: (Boolean) -> Unit) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val reduceMotion = LocalReduceMotion.current
 
     // Slide + Fade Transitions
     val enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
-        slideIntoContainer(
+        if (reduceMotion) fadeIn(animationSpec = tween(300))
+        else slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-            animationSpec = tween(500)
-        ) + fadeIn(animationSpec = tween(500))
+            animationSpec = tween(400, easing = LinearOutSlowInEasing)
+        ) + fadeIn(animationSpec = tween(400))
     }
 
     val exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) = {
-        slideOutOfContainer(
+        if (reduceMotion) fadeOut(animationSpec = tween(300))
+        else slideOutOfContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-            animationSpec = tween(500)
-        ) + fadeOut(animationSpec = tween(500))
+            animationSpec = tween(400, easing = LinearOutSlowInEasing)
+        ) + fadeOut(animationSpec = tween(400))
     }
 
     val popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
-        slideIntoContainer(
+        if (reduceMotion) fadeIn(animationSpec = tween(300))
+        else slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-            animationSpec = tween(500)
-        ) + fadeIn(animationSpec = tween(500))
+            animationSpec = tween(400, easing = LinearOutSlowInEasing)
+        ) + fadeIn(animationSpec = tween(400))
     }
 
     val popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) = {
-        slideOutOfContainer(
+        if (reduceMotion) fadeOut(animationSpec = tween(300))
+        else slideOutOfContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-            animationSpec = tween(500)
-        ) + fadeOut(animationSpec = tween(500))
+            animationSpec = tween(400, easing = LinearOutSlowInEasing)
+        ) + fadeOut(animationSpec = tween(400))
     }
 
     Scaffold(
@@ -130,7 +137,9 @@ fun RestoApp(prefs: SharedPreferences, isDarkMode: Boolean, onThemeToggle: (Bool
                 val updated = backStackEntry.arguments?.getBoolean("updated") ?: false
                 ProfileScreen(navController, prefs, updated)
             }
-            composable("edit_profile") {
+            composable(
+                route = "edit_profile"
+            ) {
                 EditProfileScreen(navController, prefs)
             }
         }

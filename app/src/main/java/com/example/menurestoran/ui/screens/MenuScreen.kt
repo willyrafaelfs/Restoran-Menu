@@ -1,17 +1,18 @@
-// File: ui/screens/MenuScreen.kt
 package com.example.menurestoran.ui.screens
 
 import android.content.SharedPreferences
 import android.widget.Toast
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -24,13 +25,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.menurestoran.model.MenuRepository
+import com.example.menurestoran.ui.theme.RonaElevation
+import com.example.menurestoran.ui.utils.LocalReduceMotion
+import com.example.menurestoran.ui.utils.pressScaleEffect
+import com.example.menurestoran.ui.utils.shimmerEffect
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,13 +44,14 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
     var searchQuery by remember { mutableStateOf("") }
     val categories = listOf("Semua", "Makanan", "Minuman")
     val context = LocalContext.current
+    val reduceMotion = LocalReduceMotion.current
     
     val menuList = remember { mutableStateListOf<com.example.menurestoran.model.MenuItem>() }
     
     LaunchedEffect(Unit) {
         menuList.clear()
         menuList.addAll(MenuRepository.getMenu(prefs))
-        delay(1500)
+        delay(1200)
         isLoading = false
     }
 
@@ -57,11 +61,20 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
         matchesCategory && matchesSearch
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    
+    val searchElevation by animateDpAsState(
+        targetValue = if (isFocused) 8.dp else 0.dp,
+        animationSpec = if (reduceMotion) snap() else tween(300),
+        label = "searchElevation"
+    )
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("Menu Restoran") },
+                title = { Text("Menu Restoran", style = MaterialTheme.typography.headlineMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -73,31 +86,46 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("add_menu") }) {
+            FloatingActionButton(
+                onClick = { navController.navigate("add_menu") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.pressScaleEffect()
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah Menu")
             }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             // Search Bar
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            Surface(
+                tonalElevation = searchElevation,
+                shadowElevation = searchElevation,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Cari Menu...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                shape = MaterialTheme.shapes.small
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Cari Menu...", style = MaterialTheme.typography.bodyLarge) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            }
                         }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
+                    },
+                    interactionSource = interactionSource,
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.small,
+                    textStyle = MaterialTheme.typography.bodyLarge
+                )
+            }
 
             // Filter Chips
             LazyRow(
@@ -105,10 +133,21 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(categories) { category ->
+                    val isSelected = selectedCategory == category
+                    val chipBgColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                        animationSpec = if (reduceMotion) snap() else tween(200),
+                        label = "chipBg"
+                    )
+                    
                     FilterChip(
-                        selected = selectedCategory == category,
+                        selected = isSelected,
                         onClick = { selectedCategory = category },
-                        label = { Text(category) }
+                        label = { Text(category, style = MaterialTheme.typography.labelLarge) },
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = chipBgColor
+                        )
                     )
                 }
             }
@@ -135,87 +174,36 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         "Belum ada menu yang ditambahkan.",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.outline,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        "Coba cari dengan kata kunci lain atau tambah menu baru.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
                 }
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 80.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(filteredMenu, key = { it.id }) { item ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = {
-                                if (it == SwipeToDismissBoxValue.StartToEnd) {
-                                    Toast.makeText(context, "${item.name} dibagikan!", Toast.LENGTH_SHORT).show()
-                                    false
-                                } else {
-                                    false
-                                }
+                    itemsIndexed(filteredMenu, key = { _, item -> item.id }) { index, item ->
+                        var visible by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) {
+                            if (reduceMotion) {
+                                visible = true
+                            } else {
+                                // Cap the delay to 600ms (max 10 items staggered) to maintain responsiveness
+                                delay((index % 10) * 60L)
+                                visible = true
                             }
-                        )
-
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            backgroundContent = {
-                                val color = when (dismissState.targetValue) {
-                                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
-                                    else -> Color.Transparent
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(color)
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd) {
-                                        Icon(Icons.Default.Share, contentDescription = "Share", tint = Color.White)
-                                    }
-                                }
-                            },
-                            enableDismissFromEndToStart = false
+                        }
+                        
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = if (reduceMotion) fadeIn() else fadeIn(tween(400)) + slideInVertically(
+                                initialOffsetY = { it / 3 },
+                                animationSpec = tween(400)
+                            )
                         ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { navController.navigate("detail/${item.id}") },
-                                elevation = CardDefaults.cardElevation(4.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    AsyncImage(
-                                        model = item.imageUrl,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(60.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(item.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                                        Text(item.price, color = MaterialTheme.colorScheme.secondary)
-                                        Text(
-                                            item.category,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline
-                                        )
-                                    }
-                                    Icon(Icons.Default.ChevronRight, contentDescription = null)
-                                }
-                            }
+                            MenuCard(item, navController, context)
                         }
                     }
                 }
@@ -224,42 +212,114 @@ fun MenuScreen(navController: NavHostController, prefs: SharedPreferences) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MenuCard(
+    item: com.example.menurestoran.model.MenuItem, 
+    navController: NavHostController,
+    context: android.content.Context
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.StartToEnd) {
+                Toast.makeText(context, "${item.name} dibagikan!", Toast.LENGTH_SHORT).show()
+                false
+            } else false
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val color = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.secondary
+                else -> Color.Transparent
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(color)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd) {
+                    Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSecondary)
+                }
+            }
+        },
+        enableDismissFromEndToStart = false
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pressScaleEffect()
+                .clickable { navController.navigate("detail/${item.id}") },
+            shape = MaterialTheme.shapes.medium,
+            elevation = CardDefaults.cardElevation(RonaElevation.card),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = if (item.imageUrl.isNotBlank()) item.imageUrl else "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        item.name, 
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        item.price, 
+                        style = MaterialTheme.typography.labelLarge, 
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        shape = MaterialTheme.shapes.extraSmall
+                    ) {
+                        Text(
+                            item.category,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            color = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
+                }
+                Icon(
+                    Icons.Default.ChevronRight, 
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun ShimmerItem() {
-    val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f),
-    )
-
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val translateAnim by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmer"
-    )
-
-    val brush = Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset.Zero,
-        end = Offset(x = translateAnim, y = translateAnim)
-    )
-
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(RonaElevation.card)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)).background(brush))
+            Box(modifier = Modifier.size(80.dp).clip(MaterialTheme.shapes.medium).shimmerEffect())
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Box(modifier = Modifier.fillMaxWidth(0.7f).height(20.dp).background(brush))
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.fillMaxWidth(0.3f).height(14.dp).background(brush))
+                Box(modifier = Modifier.fillMaxWidth(0.7f).height(20.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(modifier = Modifier.fillMaxWidth(0.3f).height(14.dp).shimmerEffect())
             }
         }
     }

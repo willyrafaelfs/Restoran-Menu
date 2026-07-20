@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.menurestoran"
+    namespace = "com.example.ronarasarestaurant"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.menurestoran"
+        applicationId = "com.example.ronarasarestaurant"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)

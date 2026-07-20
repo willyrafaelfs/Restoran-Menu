@@ -8,8 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
+import com.example.menurestoran.model.MenuRepository
 import com.example.menurestoran.navigation.RestoApp
-import com.example.menurestoran.ui.theme.MenuRestoranTheme
+import com.example.menurestoran.ui.theme.RonaRasaTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,6 +18,12 @@ class MainActivity : ComponentActivity() {
         
         val prefs = getSharedPreferences("resto_prefs", Context.MODE_PRIVATE)
         
+        // Ensure user gets the correct menu list on first run or update
+        if (!prefs.contains("menu_initialized_v3")) {
+            MenuRepository.resetToDefault(prefs)
+            prefs.edit().putBoolean("menu_initialized_v3", true).apply()
+        }
+
         enableEdgeToEdge()
         setContent {
             val systemTheme = isSystemInDarkTheme()
@@ -24,7 +31,7 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(prefs.getBoolean("dark_mode", systemTheme)) 
             }
 
-            MenuRestoranTheme(darkTheme = isDarkMode) {
+            RonaRasaTheme(darkTheme = isDarkMode) {
                 RestoApp(
                     prefs = prefs,
                     isDarkMode = isDarkMode,

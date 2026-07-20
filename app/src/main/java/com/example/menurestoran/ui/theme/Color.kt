@@ -2,10 +2,18 @@ package com.example.menurestoran.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Light Theme
+val RonaTerracotta = Color(0xFF8B4513)
+val RonaGold = Color(0xFFC8922A)
+val RonaParchment = Color(0xFFFAF6F0)
+val RonaSurface = Color(0xFFFFFDF9)
+val RonaCharcoal = Color(0xFF1C1208)
+val RonaSage = Color(0xFF6B7C5C)
+val RonaCream = Color(0xFFFDF3E3)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Dark Theme
+val RonaDarkBackground = Color(0xFF1A1208)
+val RonaDarkSurface = Color(0xFF2A1F12)
+val RonaDarkTerracotta = Color(0xFFC4714A)
+val RonaDarkGold = Color(0xFFD4A84B)
+val RonaDarkOnSurface = Color(0xFFF0E6D3)
