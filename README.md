@@ -35,25 +35,35 @@ Aplikasi ini mencakup berbagai fitur canggih untuk meningkatkan pengalaman pengg
 
 ---
 
+## 📂 Struktur Proyek
+
+Berikut adalah struktur direktori utama dari aplikasi ini:
+
+```text
+app/src/main/java/com/example/menurestoran/
+├── model/           # Data model (MenuItem) & Repository (SharedPreferences)
+├── navigation/      # Navigasi antar layar (NavHost)
+├── ui/              # Komponen UI
+│   ├── screens/     # Implementasi setiap layar (Home, Menu, Detail, dll)
+│   ├── theme/       # Konfigurasi tema (Color, Type, Theme)
+│   └── utils/       # Helper untuk animasi dan efek visual
+└── utils/           # Utility class (ImageHelper, CurrencyFormatter)
+```
+
+---
+
 ## 📸 Dokumentasi Aplikasi (Screenshots)
 
-Berikut adalah detail visual dari setiap layar aplikasi:
+Berikut adalah visual dari aplikasi ini (klik untuk memperbesar jika didukung):
 
-| Layar | Deskripsi | Screenshot |
-| :--- | :--- | :--- |
-| **Splash Screen** | Tampilan pembuka dengan animasi logo dan branding. | <img src="screenshots/splash_screen.jpg" width="200" /> |
-| **Splash Screen (Dark)** | Tampilan pembuka dalam mode gelap. | <img src="screenshots/dark_mode_splash_screen.jpg" width="200" /> |
-| **Home Screen** | Beranda utama dengan auto-sliding banner dan menu populer. | <img src="screenshots/home_screen.jpg" width="200" /> |
-| **Home Screen (V2)** | Beranda utama tampilan alternatif. | <img src="screenshots/home_screen2.jpg" width="200" /> |
-| **Home Screen (Dark)** | Tampilan beranda dalam mode gelap. | <img src="screenshots/dark_mode_home_screen.jpg" width="200" /> |
-| **Home Screen (Dark V2)** | Tampilan beranda mode gelap alternatif. | <img src="screenshots/dark_mode_home_screen2.jpg" width="200" /> |
-| **Menu Screen** | Daftar lengkap menu makanan dan minuman restoran. | <img src="screenshots/menu_screen.jpg" width="200" /> |
-| **Detail Menu** | Tampilan detail menu dengan deskripsi lengkap dan fitur rating. | <img src="screenshots/detail_menu_screen.jpg" width="200" /> |
-| **Detail Menu (V2)** | Tampilan detail menu alternatif. | <img src="screenshots/detail_menu_screen2.jpg" width="200" /> |
-| **Edit Menu** | Layar untuk mengubah informasi item menu. | <img src="screenshots/edit_menu_screen.jpg" width="200" /> |
-| **Tambah Menu** | Form untuk menambahkan menu baru. | <img src="screenshots/form_menu_screen.jpg" width="200" /> |
-| **Profil Restoran** | Tampilan informasi lengkap profil restoran. | <img src="screenshots/profile_screen.jpg" width="200" /> |
-| **Edit Profil** | Form untuk memperbarui informasi dan foto restoran. | <img src="screenshots/profile_edit_screen.jpg" width="200" /> |
+| Layar Utama | Layar Detail & Menu | Layar Profil & Edit |
+| :---: | :---: | :---: |
+| **Splash Screen** <br> <img src="screenshots/splash_screen.jpg" width="180" /> | **Menu Screen** <br> <img src="screenshots/menu_screen.jpg" width="180" /> | **Profil Restoran** <br> <img src="screenshots/profile_screen.jpg" width="180" /> |
+| **Splash (Dark)** <br> <img src="screenshots/dark_mode_splash_screen.jpg" width="180" /> | **Detail Menu** <br> <img src="screenshots/detail_menu_screen.jpg" width="180" /> | **Edit Profil** <br> <img src="screenshots/profile_edit_screen.jpg" width="180" /> |
+| **Home Screen** <br> <img src="screenshots/home_screen.jpg" width="180" /> | **Detail (V2)** <br> <img src="screenshots/detail_menu_screen2.jpg" width="180" /> | **Edit Menu** <br> <img src="screenshots/edit_menu_screen.jpg" width="180" /> |
+| **Home (V2)** <br> <img src="screenshots/home_screen2.jpg" width="180" /> | **Tambah Menu** <br> <img src="screenshots/form_menu_screen.jpg" width="180" /> | |
+| **Home (Dark)** <br> <img src="screenshots/dark_mode_home_screen.jpg" width="180" /> | | |
+| **Home (Dark V2)** <br> <img src="screenshots/dark_mode_home_screen2.jpg" width="180" /> | | |
 
 ---
 
