@@ -61,10 +61,10 @@ Berikut adalah visual dari fungsionalitas aplikasi:
 | :--- | :--- | :--- |
 | **Splash Screen** <br> Animasi pembuka logo restoran. <br> <img src="screenshots/splash_screen.jpg" width="180" /> | **Menu Screen** <br> Daftar kategori makanan & minuman. <br> <img src="screenshots/menu_screen.jpg" width="180" /> | **Profil Restoran** <br> Ringkasan informasi bisnis. <br> <img src="screenshots/profile_screen.jpg" width="180" /> |
 | **Splash (Dark Mode)** <br> Tampilan splash saat mode malam. <br> <img src="screenshots/dark_mode_splash_screen.jpg" width="180" /> | **Detail Menu** <br> Informasi lengkap, harga, & deskripsi. <br> <img src="screenshots/detail_menu_screen.jpg" width="180" /> | **Edit Profil** <br> Form ubah data & ganti foto/banner. <br> <img src="screenshots/profile_edit_screen.jpg" width="180" /> |
-| **Home Screen** <br> Beranda dengan banner otomatis. <br> <img src="screenshots/home_screen.jpg" width="180" /> | **Detail (Fitur Rating)** <br> Fitur penilaian menu yang persisten. <br> <img src="screenshots/detail_menu_screen2.jpg" width="180" /> | **Edit Menu** <br> Form untuk memperbarui data menu. <br> <img src="screenshots/edit_menu_screen.jpg" width="180" /> |
-| **Home (Menu Populer)** <br> Daftar menu favorit di beranda. <br> <img src="screenshots/home_screen2.jpg" width="180" /> | **Tambah Menu** <br> Menambahkan item baru ke database. <br> <img src="screenshots/form_menu_screen.jpg" width="180" /> | |
+| **Home Screen** <br> Beranda dengan banner otomatis dan menu populer. <br> <img src="screenshots/home_screen.jpg" width="180" /> | **Detail (Fitur Rating)** <br> Fitur penilaian menu yang persisten. <br> <img src="screenshots/detail_menu_screen2.jpg" width="180" /> | **Edit Menu** <br> Form untuk memperbarui data menu. <br> <img src="screenshots/edit_menu_screen.jpg" width="180" /> |
+| **Home (Menu Populer)** <br> Tampilan informasi restoran. <br> <img src="screenshots/home_screen2.jpg" width="180" /> | **Tambah Menu** <br> Menambahkan item baru ke database. <br> <img src="screenshots/form_menu_screen.jpg" width="180" /> | |
 | **Home (Dark Mode)** <br> Tampilan beranda mode gelap. <br> <img src="screenshots/dark_mode_home_screen.jpg" width="180" /> | | |
-| **Home Dark (Alt)** <br> Tampilan alternatif mode gelap. <br> <img src="screenshots/dark_mode_home_screen2.jpg" width="180" /> | | |
+| **Home (Dark Mode)** <br> Tampilan informasi restoran mode gelap. <br> <img src="screenshots/dark_mode_home_screen2.jpg" width="180" /> | | |
 
 ---
 
